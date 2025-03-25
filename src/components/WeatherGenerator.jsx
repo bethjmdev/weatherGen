@@ -10,17 +10,32 @@ const WeatherGenerator = () => {
   const generateWeather = (season) => {
     // Temperature ranges for New England (in Fahrenheit)
     const tempRanges = {
-      Winter: { min: 15, max: 35 },
+      Winter: {
+        extreme: { min: -20, max: 5 },
+        normal: { min: 5, max: 35 },
+      },
       Spring: { min: 40, max: 65 },
       Summer: { min: 65, max: 90 },
       Fall: { min: 40, max: 70 },
     };
 
     // Generate random temperature within season range
-    const temp = Math.floor(
-      Math.random() * (tempRanges[season].max - tempRanges[season].min + 1) +
-        tempRanges[season].min
-    );
+    let temp;
+    if (season === "Winter") {
+      // 3% chance of extreme cold
+      const isExtremeCold = Math.random() < 0.03;
+      const range = isExtremeCold
+        ? tempRanges.Winter.extreme
+        : tempRanges.Winter.normal;
+      temp = Math.floor(
+        Math.random() * (range.max - range.min + 1) + range.min
+      );
+    } else {
+      temp = Math.floor(
+        Math.random() * (tempRanges[season].max - tempRanges[season].min + 1) +
+          tempRanges[season].min
+      );
+    }
 
     // Generate wind speed (in mph)
     const windSpeed = Math.floor(Math.random() * 30); // 0-30 mph
@@ -64,8 +79,16 @@ const WeatherGenerator = () => {
     if (hasPrecip) {
       if (season === "Winter" && temp <= 32) {
         precipType = "snow";
-        // New England snowstorms typically range from 1-12 inches
-        precipAmount = Math.floor(Math.random() * 12) + 1;
+        // Check for massive snowstorms
+        const snowstormRoll = Math.random();
+        if (snowstormRoll < 0.005) {
+          precipAmount = 60; // 5 feet = 60 inches (0.5% chance)
+        } else if (snowstormRoll < 0.03) {
+          precipAmount = 36; // 3 feet = 36 inches (2.5% chance)
+        } else {
+          // Normal snow accumulation 1-12 inches
+          precipAmount = Math.floor(Math.random() * 12) + 1;
+        }
       } else if (season === "Winter" && temp > 32) {
         precipType = "sleet";
         // Sleet accumulation typically 0.1-0.5 inches
